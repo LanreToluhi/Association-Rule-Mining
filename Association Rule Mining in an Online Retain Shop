@@ -1,0 +1,36 @@
+newdt<-read_excel("Online Retail.xlsx")
+sum(is.na(newdt))
+newdt <- newdt[complete.cases(newdt), ]
+newdt$Description<-as.factor(newdt$Description)
+newdt$Country<-as.factor(newdt$Country)
+newdt$InvoiceDate<-as.Date(newdt$InvoiceDate)
+newdt$Time<- format(newdt$InvoiceDate,"%H:%M:%S")
+newdt$InvoiceNo<-as.numeric(as.character(newdt$InvoiceNo))
+#df1<-cbind(newdt,Time)
+#df1<-cbind(newdt,InvoiceNo)
+New_Data <- ddply(newdt,c("InvoiceNo","InvoiceDate"),
+                       function(newdt)paste(newdt$Description,
+                       collapse = ","))
+New_Data$InvoiceNo<-NULL
+New_Data$InvoiceDate<-NULL
+colnames(New_Data) <- c("items")
+write.csv(New_Data,"N_Trans.csv")
+dts= read.transactions('N_Trans.csv', sep = ',', rm.duplicates = T)
+str(dts)
+itemFrequencyPlot(dts,topN=7,type="relative",col=brewer.pal(8,'Pastel2'), main="Relative Item Frequency Plot")
+set.seed(1001)
+associa_rules = apriori(data = dts, 
+                        parameter = list(support = 0.0001, 
+                                         confidence = 0.0001))
+rules<-sort(associa_rules, by="lift", decreasing=TRUE) 
+inspect(rules[1:6])
+install.packages("shiny")
+library(shiny)
+
+install.packages("Matrix")
+library(Matrix)
+install.packages("arules")
+library(arules)
+
+install.packages("shiny")
+library(shiny)                                         
